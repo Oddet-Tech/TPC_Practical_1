@@ -1,4 +1,8 @@
-import 'package:final_tpg_project_p1/view/login.dart';
+// Student Numbers: 223021599
+// Student Names  : Brandon Lombaard
+// Question: Main Entry Point
+
+import 'package:final_tpg_project_p1/viewmodel/routes/routes.dart';
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +17,8 @@ void main() async {
   await Supabase.initialize(
     url: supabaseUrl,
     anonKey: supabaseAnonKey,
-  ); 
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -21,7 +26,7 @@ void main() async {
           create: (_) => ApplicationViewModel(),
         ),
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -33,7 +38,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TPG Project',
-      home: const LoginScreen(),
+      initialRoute: AppRoutes.login,
+      onGenerateRoute: AppRoutes.generateRoute,
     );
   }
 }
