@@ -1,4 +1,4 @@
-import 'package:final_tpg_project_p1/view/application_form_sreen.dart';
+import 'package:final_tpg_project_p1/view/application_form_screen.dart';
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
