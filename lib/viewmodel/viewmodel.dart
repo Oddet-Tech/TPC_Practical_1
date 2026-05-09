@@ -67,34 +67,28 @@ class ApplicationViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-   final response = await Supabase.instance.client
-       .from('applications')
-       .select()
-       .eq('user_id', userId);
-
-    if (response.error == null) {
-      applications = (response.data as List)
-         .map((data) => ApplicationModel.fromJson(data))
-         .toList();
-    } else {
-      // handle error
-      applications = [];
-      errorMessage = 'Failed to load applications: ${response.error!.message}';
+    try {
+      applications = await _service.getUserApplications(userId);
+    } catch (e) {
+      errorMessage = 'Failed to load applications.';
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> createApplication(ApplicationModel app) async {
+  Future<bool> createApplication(ApplicationModel app) async {
     isSubmitting = true;
     errorMessage = null;
     notifyListeners();
 
     try {
       await _service.createApplication(app);
+      await fetchUserApplications(app.userId);
+      return true;
     } catch (e) {
-      errorMessage = 'Failed to submit application.';
+      errorMessage = e.toString();
+      return false;
     } finally {
       isSubmitting = false;
       notifyListeners();
@@ -106,6 +100,12 @@ class ApplicationViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteApplication(String id) async {
+    await _service.deleteApplication(id);
+    applications.removeWhere((a) => a.id == id);
+    notifyListeners();
+  }
+
+  Future<void> cancelApplication(String id) async {
     await _service.deleteApplication(id);
     applications.removeWhere((a) => a.id == id);
     notifyListeners();

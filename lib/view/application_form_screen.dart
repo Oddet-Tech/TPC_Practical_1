@@ -47,31 +47,22 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
     );
 
     try {
-      await Provider.of<ApplicationViewModel>(
-        context,
-        listen: false,
-      ).createApplication(app);
-       bool submissionSuccessful = true; // if no exception was thrown, it succeeded
-
-      if (submissionSuccessful) {
-        // Fetch the latest applications
-        if (user != null) {
-          final viewModel = Provider.of<ApplicationViewModel>(context, listen: false);
-          await viewModel.fetchUserApplications(user.id);
-        }
+      final vm = Provider.of<ApplicationViewModel>(context, listen: false);
+      final success = await vm.createApplication(app);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Application submitted")));
+      if (!success) {
+        throw Exception(vm.errorMessage ?? 'Unable to submit application.');
+      }
 
-      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Application submitted")));
+
+      if (!mounted) return;
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Application failed: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Application failed: $e")));
     }
 
     if (!mounted) return;
