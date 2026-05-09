@@ -64,12 +64,17 @@ class ApplicationViewModel extends ChangeNotifier {
 
   Future<void> fetchUserApplications(String userId) async {
     isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
-    applications = await _service.getUserApplications(userId);
-
-    isLoading = false;
-    notifyListeners();
+    try {
+      applications = await _service.getUserApplications(userId);
+    } catch (e) {
+      errorMessage = 'Failed to load applications.';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> createApplication(ApplicationModel app) async {
@@ -99,12 +104,17 @@ class ApplicationViewModel extends ChangeNotifier {
 
   Future<void> fetchAllApplications() async {
     isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
-    applications = await _service.getAllApplications();
-
-    isLoading = false;
-    notifyListeners();
+    try {
+      applications = await _service.getAllApplications();
+    } catch (e) {
+      errorMessage = 'Failed to load applications.';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> updateStatus(String id, String status) async {

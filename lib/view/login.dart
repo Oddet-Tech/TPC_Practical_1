@@ -1,5 +1,7 @@
+import 'package:final_tpg_project_p1/view/student_home.dart';
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
+import 'signup.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,9 +15,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
 
   void login() async {
+    if (isLoading) return; // Prevent multiple simultaneous requests
+
     setState(() {
       isLoading = true;
     });
+
     try {
       await _authService.signIn(
         emailController.text,
@@ -25,15 +30,23 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Login successful')),
       );
+      // Navigate to StudentHome after successful login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const StudentHome()),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Login failed: $e')),
       );
     }
-    setState(() {
-      isLoading = false;
-    });
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override
@@ -56,9 +69,25 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 20),
             isLoading
                 ? CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: login,
-                    child: Text("Login"),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ElevatedButton(
+                        onPressed: login,
+                        child: Text("Login"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SignupScreen(),
+                            ),
+                          );
+                        },
+                        child: Text("Create an account"),
+                      ),
+                    ],
                   ),
           ],
         ),
