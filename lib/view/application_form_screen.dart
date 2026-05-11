@@ -18,12 +18,9 @@ class _ApplicationFormScreenState
 
   final TextEditingController yearController = TextEditingController();
   final TextEditingController module1Controller = TextEditingController();
-  final TextEditingController module1LevelController =
-      TextEditingController();
-  final TextEditingController module2Controller =
-      TextEditingController();
-  final TextEditingController module2LevelController =
-      TextEditingController();
+  final TextEditingController module1LevelController = TextEditingController();
+  final TextEditingController module2Controller = TextEditingController();
+  final TextEditingController module2LevelController = TextEditingController();
 
   bool isEligible = false;
   bool isLoading = false;
@@ -38,32 +35,79 @@ class _ApplicationFormScreenState
     super.dispose();
   }
 
+  // ========================= SUBMIT APPLICATION =========================
+
   Future<void> submitApplication() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      final vm = Provider.of<ApplicationViewModel>(context, listen: false);
-      final success = await vm.createApplication(app);
+      final vm = Provider.of<ApplicationViewModel>(
+        context,
+        listen: false,
+      );
 
-      if (!mounted) return;
+      final user = Supabase.instance.client.auth.currentUser;
 
-      if (!success) {
-        throw Exception(vm.errorMessage ?? 'Unable to submit application.');
+      if (user == null) {
+        throw Exception("User not logged in");
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Application submitted")));
+      // ✔ SAFE APPLICATION MODEL
+      final app = ApplicationModel(
+        userId: user.id,
+
+        yearOfStudy: int.parse(yearController.text.trim()),
+
+        module1: module1Controller.text.trim(),
+
+        module1Level: module1LevelController.text.trim(),
+
+        module2: module2Controller.text.trim().isEmpty
+            ? null
+            : module2Controller.text.trim(),
+
+        module2Level: module2LevelController.text.trim().isEmpty
+            ? null
+            : module2LevelController.text.trim(),
+
+        isEligible: isEligible,
+
+        documentUrl: '',
+
+        status: 'Pending',
+
+        createdAt: DateTime.now(),
+      );
+
+      await vm.createApplication(app);
 
       if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Application submitted successfully"),
+        ),
+      );
+
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Application failed: $e")));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Application failed: $e"),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
+
+  // ========================= TEXT FIELD =========================
 
   Widget buildTextField({
     required TextEditingController controller,
@@ -94,6 +138,8 @@ class _ApplicationFormScreenState
     );
   }
 
+  // ========================= UI =========================
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,6 +153,7 @@ class _ApplicationFormScreenState
           key: _formKey,
           child: ListView(
             children: [
+
               buildTextField(
                 controller: yearController,
                 label: "Year of Study",
@@ -137,14 +184,10 @@ class _ApplicationFormScreenState
 
               Card(
                 child: SwitchListTile(
-                  title: const Text(
-                    "I meet the requirements",
-                  ),
+                  title: const Text("I meet the requirements"),
                   value: isEligible,
                   onChanged: (value) {
-                    setState(() {
-                      isEligible = value;
-                    });
+                    setState(() => isEligible = value);
                   },
                 ),
               ),
@@ -152,16 +195,12 @@ class _ApplicationFormScreenState
               const SizedBox(height: 25),
 
               isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
+                  ? const Center(child: CircularProgressIndicator())
                   : SizedBox(
                       height: 50,
                       child: ElevatedButton(
                         onPressed: submitApplication,
-                        child: const Text(
-                          "Submit Application",
-                        ),
+                        child: const Text("Submit Application"),
                       ),
                     ),
             ],

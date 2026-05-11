@@ -2,44 +2,103 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:final_tpg_project_p1/model/models.dart';
 
 class ApplicationService {
-  final supabase = Supabase.instance.client;
+  final SupabaseClient supabase = Supabase.instance.client;
   static const String _tableName = 'applications';
 
-  // CREATE (FIXED NULL SAFETY)
+  // ========================= CREATE =========================
   Future<void> createApplication(ApplicationModel app) async {
-    final payload = Map<String, dynamic>.from(app.toJson());
-    if (payload['id'] == null || payload['id'] == '') {
-      payload.remove('id');
+    final payload = app.toJson();
+
+    // Never send ID on insert (let DB generate it)
+    payload.remove('id');
+
+    try {
+      await supabase.from(_tableName).insert(payload);
+    } catch (e) {
+      throw Exception("Create failed: $e");
     }
-    await supabase.from(_tableName).insert(payload);
   }
 
-  // GET USER APPLICATIONS
+  // ========================= GET USER =========================
   Future<List<ApplicationModel>> getUserApplications(String userId) async {
-    final response = await supabase.from(_tableName).select().eq('user_id', userId);
+    try {
+      final response = await supabase
+          .from(_tableName)
+          .select()
+          .eq('user_id', userId);
 
-    return (response as List).map((json) => ApplicationModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => ApplicationModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception("Fetch user applications failed: $e");
+    }
   }
 
-  // UPDATE
+  // ========================= UPDATE =========================
   Future<void> updateApplication(ApplicationModel app) async {
-    await supabase.from(_tableName).update(app.toJson()).eq('id', app.id);
+    if (app.id == null || app.id!.trim().isEmpty) {
+      throw Exception("Invalid application ID");
+    }
+
+    final payload = app.toJson();
+
+    // Prevent overwriting protected fields
+    payload.remove('id');
+    payload.remove('createdAt');
+
+    try {
+      await supabase
+          .from(_tableName)
+          .update(payload)
+          .eq('id', app.id!);
+    } catch (e) {
+      throw Exception("Update failed: $e");
+    }
   }
 
-  // DELETE
+  // ========================= DELETE =========================
   Future<void> deleteApplication(String id) async {
-    await supabase.from(_tableName).delete().eq('id', id);
+    if (id.trim().isEmpty) {
+      throw Exception("Invalid ID");
+    }
+
+    try {
+      await supabase
+          .from(_tableName)
+          .delete()
+          .eq('id', id);
+    } catch (e) {
+      throw Exception("Delete failed: $e");
+    }
   }
 
-  // ADMIN VIEW
+  // ========================= ADMIN GET ALL =========================
   Future<List<ApplicationModel>> getAllApplications() async {
-    final response = await supabase.from(_tableName).select();
+    try {
+      final response = await supabase.from(_tableName).select();
 
-    return (response as List).map((json) => ApplicationModel.fromJson(json)).toList();
+      return (response as List)
+          .map((json) => ApplicationModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception("Fetch all applications failed: $e");
+    }
   }
 
-  // STATUS UPDATE
+  // ========================= STATUS UPDATE =========================
   Future<void> updateStatus(String id, String status) async {
-    await supabase.from(_tableName).update({'status': status}).eq('id', id);
+    if (id.trim().isEmpty) {
+      throw Exception("Invalid ID");
+    }
+
+    try {
+      await supabase
+          .from(_tableName)
+          .update({'status': status})
+          .eq('id', id);
+    } catch (e) {
+      throw Exception("Status update failed: $e");
+    }
   }
 }

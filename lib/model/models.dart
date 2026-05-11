@@ -7,7 +7,7 @@ class ApplicationModel {
   final String? module2;
   final String? module2Level;
   final bool isEligible;
-  final String? documentUrl; // ✅ FIXED: optional instead of required
+  final String? documentUrl; // ✅ FIXED: optional instead of requi
   final String status;
   final DateTime createdAt;
 
