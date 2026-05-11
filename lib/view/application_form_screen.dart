@@ -51,6 +51,14 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
         context,
         listen: false,
       ).createApplication(app);
+       bool submissionSuccessful = true; // if no exception was thrown, it succeeded
+
+      if (submissionSuccessful) {
+        // Fetch the latest applications
+        if (user != null) {
+          final viewModel = Provider.of<ApplicationViewModel>(context, listen: false);
+          await viewModel.fetchUserApplications(user.id);
+        }
 
       if (!mounted) return;
 

@@ -67,10 +67,19 @@ class ApplicationViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    try {
-      applications = await _service.getUserApplications(userId);
-    } catch (e) {
-      errorMessage = 'Failed to load applications.';
+   final response = await Supabase.instance.client
+       .from('applications')
+       .select()
+       .eq('user_id', userId);
+
+    if (response.error == null) {
+      applications = (response.data as List)
+         .map((data) => ApplicationModel.fromJson(data))
+         .toList();
+    } else {
+      // handle error
+      applications = [];
+      errorMessage = 'Failed to load applications: ${response.error!.message}';
     } finally {
       isLoading = false;
       notifyListeners();
