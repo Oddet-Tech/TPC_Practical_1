@@ -8,33 +8,71 @@ class StudentHome extends StatefulWidget {
   const StudentHome({super.key});
 
   @override
-  StudentHomeState createState() => StudentHomeState();
+  State<StudentHome> createState() =>
+      _StudentHomeState();
 }
 
-class StudentHomeState extends State<StudentHome> {
+class _StudentHomeState
+    extends State<StudentHome> {
   @override
   void initState() {
     super.initState();
 
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) return;
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ApplicationViewModel>(
+      final user = Supabase
+          .instance.client.auth.currentUser;
+
+      if (user != null) {
+        Provider.of<ApplicationViewModel>(
+          context,
+          listen: false,
+        ).fetchUserApplications(user.id);
+      }
+    });
+  }
+
+  Future<void> refreshApplications() async {
+    final user = Supabase
+        .instance.client.auth.currentUser;
+
+    if (user != null) {
+      await Provider.of<ApplicationViewModel>(
         context,
         listen: false,
       ).fetchUserApplications(user.id);
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<ApplicationViewModel>(context);
+    final vm =
+        Provider.of<ApplicationViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Student Home")),
+      appBar: AppBar(
+        title: const Text("Student Home"),
+        centerTitle: true,
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  const ApplicationFormScreen(),
+            ),
+          );
+
+          refreshApplications();
+        },
+      ),
+
       body: vm.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
           : Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -159,13 +197,68 @@ class StudentHomeState extends State<StudentHome> {
                                       ),
                                     ],
                                   ),
+
+                                const SizedBox(
+                                    height: 15),
+
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .end,
+                                  children: [
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton
+                                          .styleFrom(
+                                        backgroundColor:
+                                            Colors.red,
+                                      ),
+                                      onPressed: () async {
+                                        if (app.id ==
+                                            null) return;
+
+                                        await vm
+                                            .deleteApplication(
+                                                app.id!);
+
+                                        refreshApplications();
+
+                                        if (!context
+                                            .mounted) {
+                                          return;
+                                        }
+
+                                        ScaffoldMessenger
+                                                .of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Application cancelled",
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.cancel,
+                                        color:
+                                            Colors.white,
+                                      ),
+                                      label: const Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          color:
+                                              Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                            },
+                              ],
+                            ),
                           ),
-                  ),
-                ],
-              ),
+                        );
+                      },
+                    ),
             ),
     );
   }

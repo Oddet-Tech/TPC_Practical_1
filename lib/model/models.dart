@@ -1,36 +1,5 @@
-class UserModel { //Blueprint for User or Admin,Helps Identify both And direct them to right pages through role
-  final String id;
-  final String email;
-  final String role;
-  final String fullName;
-
-  UserModel({
-    required this.id,//it has to be there,it's required
-    required this.email,//Same
-    required this.role,//Same
-    required this.fullName,//Same
-  });
-
-  factory UserModel.fromJson(Map<String, dynamic> json) { //A special Constructor
-    return UserModel(// this will take Each data that is created by user to the database
-      id: json['id'],
-      email: json['email'],
-      role: json['role'],
-      fullName: json['full_name'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {//Retrieve information from database and display it to user
-    return {//CRUD methods
-      'id': id,
-      'email': email,
-      'role': role,
-      'full_name': fullName,
-    };
-  }
-}
-class ApplicationModel {//Application Information with the Same Idea of User/Admin information
-  final String id;
+class ApplicationModel {
+  final String? id; // ✅ FIXED: allow Supabase to generate UUID
   final String userId;
   final int yearOfStudy;
   final String module1;
@@ -38,12 +7,12 @@ class ApplicationModel {//Application Information with the Same Idea of User/Adm
   final String? module2;
   final String? module2Level;
   final bool isEligible;
-  final String documentUrl;
+  final String? documentUrl; // ✅ FIXED: optional instead of required
   final String status;
   final DateTime createdAt;
 
   ApplicationModel({
-    required this.id,
+    this.id,
     required this.userId,
     required this.yearOfStudy,
     required this.module1,
@@ -51,14 +20,15 @@ class ApplicationModel {//Application Information with the Same Idea of User/Adm
     this.module2,
     this.module2Level,
     required this.isEligible,
-    required this.documentUrl,
+    this.documentUrl,
     required this.status,
     required this.createdAt,
   });
 
+  // 🔄 FROM SUPABASE → APP
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     return ApplicationModel(
-      id: json['id'],
+      id: json['id']?.toString(),
       userId: json['user_id'],
       yearOfStudy: json['year_of_study'],
       module1: json['module1'],
@@ -72,9 +42,10 @@ class ApplicationModel {//Application Information with the Same Idea of User/Adm
     );
   }
 
+  // 🔄 APP → SUPABASE
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      // ❌ DO NOT send id (Supabase generates it)
       'user_id': userId,
       'year_of_study': yearOfStudy,
       'module1': module1,
@@ -85,6 +56,38 @@ class ApplicationModel {//Application Information with the Same Idea of User/Adm
       'document_url': documentUrl,
       'status': status,
       'created_at': createdAt.toIso8601String(),
+    };
+  }
+}class UserModel {
+  final String id;
+  final String email;
+  final String role;
+  final String fullName;
+
+  UserModel({
+    required this.id,
+    required this.email,
+    required this.role,
+    required this.fullName,
+  });
+
+  // 🔄 Convert from Supabase JSON → Dart object
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'],
+      email: json['email'],
+      role: json['role'],
+      fullName: json['full_name'],
+    );
+  }
+
+  // 🔄 Convert Dart object → JSON (for DB if needed)
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'role': role,
+      'full_name': fullName,
     };
   }
 }
