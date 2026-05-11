@@ -46,63 +46,22 @@ class _ApplicationFormScreenState
     });
 
     try {
-      final user = Supabase.instance.client.auth.currentUser;
-
-      if (user == null) {
-        throw Exception("User not logged in");
-      }
-
-      final application = ApplicationModel(
-        id: '',
-        userId: user.id,
-        yearOfStudy: int.parse(yearController.text.trim()),
-        module1: module1Controller.text.trim(),
-        module1Level: module1LevelController.text.trim(),
-        module2: module2Controller.text.trim().isEmpty
-            ? null
-            : module2Controller.text.trim(),
-        module2Level:
-            module2LevelController.text.trim().isEmpty
-                ? null
-                : module2LevelController.text.trim(),
-        isEligible: isEligible,
-        documentUrl: '',
-        status: 'Pending',
-        createdAt: DateTime.now(),
-      );
-
-      await Provider.of<ApplicationViewModel>(
-        context,
-        listen: false,
-      ).createApplication(application);
+      final vm = Provider.of<ApplicationViewModel>(context, listen: false);
+      final success = await vm.createApplication(app);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Application submitted successfully",
-          ),
-        ),
-      );
+      if (!success) {
+        throw Exception(vm.errorMessage ?? 'Unable to submit application.');
+      }
 
-      Navigator.pop(context, application);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Application submitted")));
+
+      if (!mounted) return;
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Failed to submit application: $e",
-          ),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Application failed: $e")));
     }
   }
 
