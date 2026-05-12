@@ -9,9 +9,6 @@ class ApplicationService {
   Future<void> createApplication(ApplicationModel app) async {
     final payload = app.toJson();
 
-    // Never send ID on insert (let DB generate it)
-    payload.remove('id');
-
     try {
       await supabase.from(_tableName).insert(payload);
     } catch (e) {
@@ -25,7 +22,7 @@ class ApplicationService {
       final response = await supabase
           .from(_tableName)
           .select()
-          .eq('user_id', userId);
+          .eq('id', userId);
 
       return (response as List)
           .map((json) => ApplicationModel.fromJson(json))
@@ -42,10 +39,7 @@ class ApplicationService {
     }
 
     final payload = app.toJson();
-
-    // Prevent overwriting protected fields
-    payload.remove('id');
-    payload.remove('createdAt');
+    payload.remove('created_at');
 
     try {
       await supabase
