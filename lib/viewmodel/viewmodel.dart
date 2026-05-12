@@ -102,6 +102,7 @@ class ApplicationViewModel extends ChangeNotifier {
       await fetchUserApplications(app.userId);
     } catch (e) {
       errorMessage = 'Failed to submit application: $e';
+      rethrow;
     } finally {
       isSubmitting = false;
       notifyListeners();

@@ -29,9 +29,9 @@ class ApplicationModel {
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     return ApplicationModel(
       id: json['id']?.toString(),
-      userId: json['user_id'],
+      userId: json['id']?.toString() ?? '',
       yearOfStudy: json['year_of_study'],
-      module1: json['module1'],
+      module1: json['module_level'],
       module1Level: json['module1_level'],
       module2: json['module2'],
       module2Level: json['module2_level'],
@@ -46,12 +46,11 @@ class ApplicationModel {
   Map<String, dynamic> toJson() {
     return {
       // ❌ DO NOT send id (Supabase generates it)
-      'user_id': userId,
+      'id': userId,
       'year_of_study': yearOfStudy,
-      'module1': module1,
+      'module_level': module1,
       'module1_level': module1Level,
-      'module2': module2,
-      'module2_level': module2Level,
+      'module2_level': module2Level ?? '',
       'is_eligible': isEligible,
       'document_url': documentUrl,
       'status': status,
