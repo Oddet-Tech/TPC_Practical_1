@@ -2,12 +2,14 @@ import 'package:final_tpg_project_p1/view/student_home.dart';
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
 import 'signup.dart';
+import 'forgot_password_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
+
 class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   final TextEditingController emailController = TextEditingController();
@@ -22,14 +24,11 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.signIn(
-        emailController.text,
-        passwordController.text,
-      );
+      await _authService.signIn(emailController.text, passwordController.text);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Login successful')));
       // Navigate to StudentHome after successful login
       Navigator.pushReplacement(
         context,
@@ -37,9 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
     }
 
     if (mounted) {
@@ -72,10 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      ElevatedButton(
-                        onPressed: login,
-                        child: Text("Login"),
-                      ),
+                      ElevatedButton(onPressed: login, child: Text("Login")),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
@@ -86,6 +82,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         child: Text("Create an account"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ForgotPasswordView(),
+                            ),
+                          );
+                        },
+                        child: Text("Forgot Password?"),
                       ),
                     ],
                   ),
