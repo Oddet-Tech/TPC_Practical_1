@@ -2,7 +2,6 @@ import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -18,8 +17,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // Fetch all applications when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        Provider.of<ApplicationViewModel>(context, listen: false)
-            .fetchAllApplications();
+        Provider.of<ApplicationViewModel>(
+          context,
+          listen: false,
+        ).fetchAllApplications();
       }
     });
   }
@@ -29,9 +30,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final vm = Provider.of<ApplicationViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Admin Dashboard"),
-      ),
+      appBar: AppBar(title: Text("Admin Dashboard")),
       body: vm.isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -46,8 +45,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Student ID: ${app.userId}",
-                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          "Student ID: ${app.userId}",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
 
                         SizedBox(height: 5),
                         Text("Year: ${app.yearOfStudy}"),
@@ -56,7 +57,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                         if (app.module2 != null)
                           Text(
-                              "Module 2: ${app.module2} (${app.module2Level})"),
+                            "Module 2: ${app.module2} (${app.module2Level})",
+                          ),
 
                         SizedBox(height: 5),
                         Text("Status: ${app.status}"),
@@ -68,8 +70,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           children: [
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(
-                                    app.id, "approved");
+                                await vm.updateStatus(app.id, "approved");
                                 vm.fetchAllApplications();
                               },
                               child: Text("Approve"),
@@ -77,12 +78,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(
-                                    app.id, "rejected");
+                                await vm.updateStatus(app.id, "rejected");
                                 vm.fetchAllApplications();
                               },
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red),
+                                backgroundColor: Colors.red,
+                              ),
                               child: Text("Reject"),
                             ),
 
@@ -94,7 +95,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               },
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),

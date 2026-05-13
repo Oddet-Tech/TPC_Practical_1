@@ -31,7 +31,7 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
     final user = Supabase.instance.client.auth.currentUser;
 
     final app = ApplicationModel(
-      id: '', // Supabase can auto-generate if configured
+      id: '',
       userId: user!.id,
       yearOfStudy: int.parse(yearController.text),
       module1: module1Controller.text,
@@ -41,7 +41,7 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
           ? null
           : module2LevelController.text,
       isEligible: isEligible,
-      documentUrl: '', // skip for now or add later
+      documentUrl: '',
       status: 'pending',
       createdAt: DateTime.now(),
     );
@@ -73,64 +73,249 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Apply")),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: ListView(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF6C63FF), Color(0xFF48CAE4)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextFormField(
-                controller: yearController,
-                decoration: InputDecoration(labelText: "Year of Study"),
-                keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? "Enter year" : null,
-              ),
-
-              TextFormField(
-                controller: module1Controller,
-                decoration: InputDecoration(labelText: "Module 1"),
-                validator: (value) => value!.isEmpty ? "Enter module 1" : null,
-              ),
-
-              TextFormField(
-                controller: module1LevelController,
-                decoration: InputDecoration(labelText: "Module 1 Level"),
-                validator: (value) => value!.isEmpty ? "Enter level" : null,
-              ),
-
-              TextFormField(
-                controller: module2Controller,
-                decoration: InputDecoration(labelText: "Module 2 (Optional)"),
-              ),
-
-              TextFormField(
-                controller: module2LevelController,
-                decoration: InputDecoration(
-                  labelText: "Module 2 Level (Optional)",
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 12, 24, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const SizedBox(width: 4),
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Apply for Tutoring',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        Text(
+                          'Fill in the details below',
+                          style: TextStyle(fontSize: 13, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
 
-              SwitchListTile(
-                title: Text("I meet the requirements"),
-                value: isEligible,
-                onChanged: (value) {
-                  setState(() {
-                    isEligible = value;
-                  });
-                },
-              ),
+              const SizedBox(height: 20),
 
-              SizedBox(height: 20),
-
-              isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: submitApplication,
-                      child: Text("Submit Application"),
+              // White rounded sheet
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF5F6FA),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(28),
+                      topRight: Radius.circular(28),
                     ),
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
+                      children: [
+                        // Section: Study Info
+                        _sectionLabel('Study Information'),
+                        const SizedBox(height: 12),
+                        _buildField(
+                          controller: yearController,
+                          label: 'Year of Study',
+                          icon: Icons.calendar_today_outlined,
+                          keyboardType: TextInputType.number,
+                          validator: (v) =>
+                              v!.isEmpty ? 'Enter year of study' : null,
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Section: Module 1
+                        _sectionLabel('Module 1'),
+                        const SizedBox(height: 12),
+                        _buildField(
+                          controller: module1Controller,
+                          label: 'Module Name',
+                          icon: Icons.book_outlined,
+                          validator: (v) =>
+                              v!.isEmpty ? 'Enter module 1' : null,
+                        ),
+                        const SizedBox(height: 14),
+                        _buildField(
+                          controller: module1LevelController,
+                          label: 'Module Level',
+                          icon: Icons.bar_chart_outlined,
+                          validator: (v) => v!.isEmpty ? 'Enter level' : null,
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Section: Module 2
+                        _sectionLabel('Module 2 (Optional)'),
+                        const SizedBox(height: 12),
+                        _buildField(
+                          controller: module2Controller,
+                          label: 'Module Name',
+                          icon: Icons.book_outlined,
+                        ),
+                        const SizedBox(height: 14),
+                        _buildField(
+                          controller: module2LevelController,
+                          label: 'Module Level',
+                          icon: Icons.bar_chart_outlined,
+                        ),
+                        const SizedBox(height: 28),
+
+                        // Eligibility toggle
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: SwitchListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 4,
+                            ),
+                            title: const Text(
+                              'I meet the requirements',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Color(0xFF1A1A2E),
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'Confirm your eligibility for this application',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.black45,
+                              ),
+                            ),
+                            value: isEligible,
+
+                            onChanged: (value) =>
+                                setState(() => isEligible = value),
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        // Submit button
+                        isLoading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: Color(0xFF6C63FF),
+                                ),
+                              )
+                            : ElevatedButton.icon(
+                                onPressed: submitApplication,
+                                icon: const Icon(Icons.send_outlined, size: 18),
+                                label: const Text(
+                                  'Submit Application',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF6C63FF),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  elevation: 0,
+                                ),
+                              ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionLabel(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.bold,
+        color: Color(0xFF6C63FF),
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A2E)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.black45, fontSize: 13),
+        prefixIcon: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
       ),
     );
