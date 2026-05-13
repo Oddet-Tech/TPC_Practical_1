@@ -1,0 +1,16 @@
+[33m6a0dd32[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge pull request #4 from asivendamase74-coder/my-features
+[33mbb2df97[m Merge branch 'main' into my-features
+[33mad8aa8d[m Resolved merge conflict
+[33m6429623[m fixing the UI and log in permission
+[33m66df3af[m Add application display and management features
+[33m4a23a01[m Merge pull request #3 from KaraboSelahla/main
+[33m57954ec[m Merge pull request #1 from KaraboSelahla/KaraboSelahla-patch-2
+[33m90c0fe4[m Refactor application loading to use Supabase client
+[33mb99c299[m Add submission success flag and fetch user applications
+[33ma0a5968[m Merge pull request #2 from HiImNameless/main
+[33m6104e95[m Fixed infinite loading after login
+[33me266912[m Add all new changes
+[33m328d483[m commit all new changes
+[33mbae088b[m Merge pull request #1 from HiImNameless/main
+[33m13d3793[m Add viewmodel auth state, route definitions, and clean up gitignore
+[33md14f817[m Initial commit
