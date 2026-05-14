@@ -8,10 +8,12 @@ class ApplicationFormScreen extends StatefulWidget {
   const ApplicationFormScreen({super.key});
 
   @override
-  ApplicationFormScreenState createState() => ApplicationFormScreenState();
+  State<ApplicationFormScreen> createState() =>
+      _ApplicationFormScreenState();
 }
 
-class ApplicationFormScreenState extends State<ApplicationFormScreen> {
+class _ApplicationFormScreenState
+    extends State<ApplicationFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController yearController = TextEditingController();
@@ -23,7 +25,19 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
   bool isEligible = false;
   bool isLoading = false;
 
-  void submitApplication() async {
+  @override
+  void dispose() {
+    yearController.dispose();
+    module1Controller.dispose();
+    module1LevelController.dispose();
+    module2Controller.dispose();
+    module2LevelController.dispose();
+    super.dispose();
+  }
+
+  // ========================= SUBMIT APPLICATION =========================
+
+  Future<void> submitApplication() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => isLoading = true);
@@ -47,275 +61,171 @@ class ApplicationFormScreenState extends State<ApplicationFormScreen> {
     );
 
     try {
-      await Provider.of<ApplicationViewModel>(
+      final vm = Provider.of<ApplicationViewModel>(
         context,
         listen: false,
-      ).createApplication(app);
+      );
+
+      final user = Supabase.instance.client.auth.currentUser;
+
+      if (user == null) {
+        throw Exception("User not logged in");
+      }
+
+      // ✔ SAFE APPLICATION MODEL
+      final app = ApplicationModel(
+        userId: user.id,
+
+        yearOfStudy: int.parse(yearController.text.trim()),
+
+        module1: module1Controller.text.trim(),
+
+        module1Level: module1LevelController.text.trim(),
+
+        module2: module2Controller.text.trim().isEmpty
+            ? null
+            : module2Controller.text.trim(),
+
+        module2Level: module2LevelController.text.trim().isEmpty
+            ? null
+            : module2LevelController.text.trim(),
+
+        isEligible: isEligible,
+
+        documentUrl: '',
+
+        status: 'Pending',
+
+        createdAt: DateTime.now(),
+      );
+
+      await vm.createApplication(app);
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Application submitted")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Application submitted successfully"),
+        ),
+      );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Application failed: $e")));
-    }
 
-    if (!mounted) return;
-    setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Application failed: $e"),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
   }
+
+  // ========================= TEXT FIELD =========================
+
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool isNumber = false,
+    bool requiredField = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: TextFormField(
+        controller: controller,
+        keyboardType:
+            isNumber ? TextInputType.number : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        validator: (value) {
+          if (requiredField &&
+              (value == null || value.trim().isEmpty)) {
+            return "Please enter $label";
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  // ========================= UI =========================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF6C63FF), Color(0xFF48CAE4)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: AppBar(
+        title: const Text("Application Form"),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
             children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8, 12, 24, 0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 4),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Apply for Tutoring',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
-                        Text(
-                          'Fill in the details below',
-                          style: TextStyle(fontSize: 13, color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ],
+
+              buildTextField(
+                controller: yearController,
+                label: "Year of Study",
+                isNumber: true,
+              ),
+
+              buildTextField(
+                controller: module1Controller,
+                label: "Module 1",
+              ),
+
+              buildTextField(
+                controller: module1LevelController,
+                label: "Module 1 Level",
+              ),
+
+              buildTextField(
+                controller: module2Controller,
+                label: "Module 2 (Optional)",
+                requiredField: false,
+              ),
+
+              buildTextField(
+                controller: module2LevelController,
+                label: "Module 2 Level (Optional)",
+                requiredField: false,
+              ),
+
+              Card(
+                child: SwitchListTile(
+                  title: const Text("I meet the requirements"),
+                  value: isEligible,
+                  onChanged: (value) {
+                    setState(() => isEligible = value);
+                  },
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
-              // White rounded sheet
-              Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF5F6FA),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(28),
-                      topRight: Radius.circular(28),
-                    ),
-                  ),
-                  child: Form(
-                    key: _formKey,
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 28),
-                      children: [
-                        // Section: Study Info
-                        _sectionLabel('Study Information'),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: yearController,
-                          label: 'Year of Study',
-                          icon: Icons.calendar_today_outlined,
-                          keyboardType: TextInputType.number,
-                          validator: (v) =>
-                              v!.isEmpty ? 'Enter year of study' : null,
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Section: Module 1
-                        _sectionLabel('Module 1'),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: module1Controller,
-                          label: 'Module Name',
-                          icon: Icons.book_outlined,
-                          validator: (v) =>
-                              v!.isEmpty ? 'Enter module 1' : null,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildField(
-                          controller: module1LevelController,
-                          label: 'Module Level',
-                          icon: Icons.bar_chart_outlined,
-                          validator: (v) => v!.isEmpty ? 'Enter level' : null,
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Section: Module 2
-                        _sectionLabel('Module 2 (Optional)'),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: module2Controller,
-                          label: 'Module Name',
-                          icon: Icons.book_outlined,
-                        ),
-                        const SizedBox(height: 14),
-                        _buildField(
-                          controller: module2LevelController,
-                          label: 'Module Level',
-                          icon: Icons.bar_chart_outlined,
-                        ),
-                        const SizedBox(height: 28),
-
-                        // Eligibility toggle
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: SwitchListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 4,
-                            ),
-                            title: const Text(
-                              'I meet the requirements',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: Color(0xFF1A1A2E),
-                              ),
-                            ),
-                            subtitle: const Text(
-                              'Confirm your eligibility for this application',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black45,
-                              ),
-                            ),
-                            value: isEligible,
-
-                            onChanged: (value) =>
-                                setState(() => isEligible = value),
-                          ),
-                        ),
-
-                        const SizedBox(height: 28),
-
-                        // Submit button
-                        isLoading
-                            ? const Center(
-                                child: CircularProgressIndicator(
-                                  color: Color(0xFF6C63FF),
-                                ),
-                              )
-                            : ElevatedButton.icon(
-                                onPressed: submitApplication,
-                                icon: const Icon(Icons.send_outlined, size: 18),
-                                label: const Text(
-                                  'Submit Application',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF6C63FF),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  elevation: 0,
-                                ),
-                              ),
-                      ],
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: submitApplication,
+                        child: const Text("Submit Application"),
+                      ),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _sectionLabel(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF6C63FF),
-        letterSpacing: 0.8,
-      ),
-    );
-  }
-
-  Widget _buildField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A2E)),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.black45, fontSize: 13),
-        prefixIcon: Icon(icon, color: const Color(0xFF6C63FF), size: 20),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.black12),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF6C63FF), width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
         ),
       ),
     );

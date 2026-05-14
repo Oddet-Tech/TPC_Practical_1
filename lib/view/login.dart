@@ -2,7 +2,7 @@ import 'package:final_tpg_project_p1/view/student_home.dart';
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
 import 'signup.dart';
-import 'forgot_password.dart';
+import 'forgot_password_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
