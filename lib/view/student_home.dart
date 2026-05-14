@@ -28,32 +28,16 @@ class _StudentHomeState extends State<StudentHome> {
     });
   }
 
-  Color _statusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      default:
-        return Colors.orange;
-    }
-  }
-
-  IconData _statusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Icons.check_circle_outline;
-      case 'rejected':
-        return Icons.cancel_outlined;
-      default:
-        return Icons.hourglass_empty;
-    }
+  Future<void> refresh() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return;
+    await Provider.of<ApplicationViewModel>(context, listen: false)
+        .fetchUserApplications(user.id);
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<ApplicationViewModel>(context);
-    final user = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -131,12 +115,13 @@ class _StudentHomeState extends State<StudentHome> {
                                 onPressed: () async {
                                   if (app.id == null) return;
 
+                                  final messenger = ScaffoldMessenger.of(context);
                                   await vm.deleteApplication(app.id!);
                                   await refresh();
 
                                   if (!mounted) return;
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  messenger.showSnackBar(
                                     const SnackBar(
                                       content: Text("Application cancelled"),
                                     ),
