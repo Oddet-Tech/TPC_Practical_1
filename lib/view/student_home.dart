@@ -28,20 +28,32 @@ class _StudentHomeState extends State<StudentHome> {
     });
   }
 
-  Future<void> refresh() async {
-    final user = Supabase.instance.client.auth.currentUser;
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.orange;
+    }
+  }
 
-    if (user == null) return;
-
-    await Provider.of<ApplicationViewModel>(
-      context,
-      listen: false,
-    ).fetchUserApplications(user.id);
+  IconData _statusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return Icons.check_circle_outline;
+      case 'rejected':
+        return Icons.cancel_outlined;
+      default:
+        return Icons.hourglass_empty;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = Provider.of<ApplicationViewModel>(context);
+    final user = Supabase.instance.client.auth.currentUser;
 
     return Scaffold(
       appBar: AppBar(

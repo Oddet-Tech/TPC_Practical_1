@@ -17,10 +17,12 @@ class _AdminDashboardState
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ApplicationViewModel>(
-        context,
-        listen: false,
-      ).fetchAllApplications();
+      if (mounted) {
+        Provider.of<ApplicationViewModel>(
+          context,
+          listen: false,
+        ).fetchAllApplications();
+      }
     });
   }
 
@@ -30,10 +32,7 @@ class _AdminDashboardState
         Provider.of<ApplicationViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Admin Dashboard"),
-      ),
-
+      appBar: AppBar(title: Text("Admin Dashboard")),
       body: vm.isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -54,13 +53,8 @@ class _AdminDashboardState
                       children: [
                         Text(
                           "Student ID: ${app.userId}",
-                          style: const TextStyle(
-                            fontWeight:
-                                FontWeight.bold,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-
-                        const SizedBox(height: 5),
 
                         Text(
                           "Year: ${app.yearOfStudy}",
@@ -90,15 +84,7 @@ class _AdminDashboardState
                           children: [
                             ElevatedButton(
                               onPressed: () async {
-                                if (app.id == null)
-                                  return;
-
-                                await vm
-                                    .updateStatus(
-                                  app.id!,
-                                  "approved",
-                                );
-
+                                await vm.updateStatus(app.id, "approved");
                                 vm.fetchAllApplications();
                               },
                               child: const Text(
@@ -108,25 +94,13 @@ class _AdminDashboardState
 
                             ElevatedButton(
                               onPressed: () async {
-                                if (app.id == null)
-                                  return;
-
-                                await vm
-                                    .updateStatus(
-                                  app.id!,
-                                  "rejected",
-                                );
-
+                                await vm.updateStatus(app.id, "rejected");
                                 vm.fetchAllApplications();
                               },
-                              style: ElevatedButton
-                                  .styleFrom(
-                                backgroundColor:
-                                    Colors.red,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
                               ),
-                              child: const Text(
-                                "Reject",
-                              ),
+                              child: Text("Reject"),
                             ),
 
                             IconButton(

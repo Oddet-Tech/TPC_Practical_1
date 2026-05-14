@@ -42,6 +42,24 @@ class _ApplicationFormScreenState
 
     setState(() => isLoading = true);
 
+    final user = Supabase.instance.client.auth.currentUser;
+
+    final app = ApplicationModel(
+      id: '',
+      userId: user!.id,
+      yearOfStudy: int.parse(yearController.text),
+      module1: module1Controller.text,
+      module1Level: module1LevelController.text,
+      module2: module2Controller.text.isEmpty ? null : module2Controller.text,
+      module2Level: module2LevelController.text.isEmpty
+          ? null
+          : module2LevelController.text,
+      isEligible: isEligible,
+      documentUrl: '',
+      status: 'pending',
+      createdAt: DateTime.now(),
+    );
+
     try {
       final vm = Provider.of<ApplicationViewModel>(
         context,
@@ -203,6 +221,9 @@ class _ApplicationFormScreenState
                         child: const Text("Submit Application"),
                       ),
                     ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
