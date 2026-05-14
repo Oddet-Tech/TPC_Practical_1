@@ -45,7 +45,6 @@ class ApplicationModel {
   // 🔄 APP → SUPABASE
   Map<String, dynamic> toJson() {
     return {
-      // ❌ DO NOT send id (Supabase generates it)
       'id': userId,
       'year_of_study': yearOfStudy,
       'module_level': module1,

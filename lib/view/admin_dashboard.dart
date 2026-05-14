@@ -84,7 +84,8 @@ class _AdminDashboardState
                           children: [
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(app.id, "approved");
+                                if (app.id == null) return;
+                                await vm.updateStatus(app.id!, "approved");
                                 vm.fetchAllApplications();
                               },
                               child: const Text(
@@ -94,7 +95,8 @@ class _AdminDashboardState
 
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(app.id, "rejected");
+                                if (app.id == null) return;
+                                await vm.updateStatus(app.id!, "rejected");
                                 vm.fetchAllApplications();
                               },
                               style: ElevatedButton.styleFrom(
@@ -108,8 +110,9 @@ class _AdminDashboardState
                                 Icons.delete,
                               ),
                               onPressed: () async {
-                                if (app.id == null)
+                                if (app.id == null) {
                                   return;
+                                }
 
                                 await vm
                                     .deleteApplication(
