@@ -32,7 +32,10 @@ class _AdminDashboardState
         Provider.of<ApplicationViewModel>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Admin Dashboard")),
+      appBar: AppBar(
+        title: const Text("Admin Dashboard"),
+      ),
+
       body: vm.isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -45,15 +48,18 @@ class _AdminDashboardState
                 return Card(
                   margin: const EdgeInsets.all(10),
                   child: Padding(
-                    padding:
-                        const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
+
                     child: Column(
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
+
                       children: [
                         Text(
                           "Student ID: ${app.userId}",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
 
                         Text(
@@ -79,14 +85,21 @@ class _AdminDashboardState
 
                         Row(
                           mainAxisAlignment:
-                              MainAxisAlignment
-                                  .spaceBetween,
+                              MainAxisAlignment.spaceBetween,
+
                           children: [
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(app.id, "approved");
-                                vm.fetchAllApplications();
+                                if (app.id == null) return;
+
+                                await vm.updateStatus(
+                                  app.id!,
+                                  "approved",
+                                );
+
+                                await vm.fetchAllApplications();
                               },
+
                               child: const Text(
                                 "Approve",
                               ),
@@ -94,19 +107,32 @@ class _AdminDashboardState
 
                             ElevatedButton(
                               onPressed: () async {
-                                await vm.updateStatus(app.id, "rejected");
-                                vm.fetchAllApplications();
+                                if (app.id == null) return;
+
+                                await vm.updateStatus(
+                                  app.id!,
+                                  "rejected",
+                                );
+
+                                await vm.fetchAllApplications();
                               },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
+
+                              style:
+                                  ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Colors.red,
                               ),
-                              child: Text("Reject"),
+
+                              child: const Text(
+                                "Reject",
+                              ),
                             ),
 
                             IconButton(
                               icon: const Icon(
                                 Icons.delete,
                               ),
+
                               onPressed: () async {
                                 if (app.id == null)
                                   return;
@@ -116,7 +142,7 @@ class _AdminDashboardState
                                   app.id!,
                                 );
 
-                                vm.fetchAllApplications();
+                                await vm.fetchAllApplications();
                               },
                             ),
                           ],

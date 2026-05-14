@@ -1,3 +1,4 @@
+
 import 'package:final_tpg_project_p1/model/models.dart';
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +17,20 @@ class _ApplicationFormScreenState
     extends State<ApplicationFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController module1Controller = TextEditingController();
-  final TextEditingController module1LevelController = TextEditingController();
-  final TextEditingController module2Controller = TextEditingController();
-  final TextEditingController module2LevelController = TextEditingController();
+  final TextEditingController yearController =
+      TextEditingController();
+
+  final TextEditingController module1Controller =
+      TextEditingController();
+
+  final TextEditingController module1LevelController =
+      TextEditingController();
+
+  final TextEditingController module2Controller =
+      TextEditingController();
+
+  final TextEditingController module2LevelController =
+      TextEditingController();
 
   bool isEligible = false;
   bool isLoading = false;
@@ -42,51 +52,42 @@ class _ApplicationFormScreenState
 
     setState(() => isLoading = true);
 
-    final user = Supabase.instance.client.auth.currentUser;
-
-    final app = ApplicationModel(
-      id: '',
-      userId: user!.id,
-      yearOfStudy: int.parse(yearController.text),
-      module1: module1Controller.text,
-      module1Level: module1LevelController.text,
-      module2: module2Controller.text.isEmpty ? null : module2Controller.text,
-      module2Level: module2LevelController.text.isEmpty
-          ? null
-          : module2LevelController.text,
-      isEligible: isEligible,
-      documentUrl: '',
-      status: 'pending',
-      createdAt: DateTime.now(),
-    );
-
     try {
       final vm = Provider.of<ApplicationViewModel>(
         context,
         listen: false,
       );
 
-      final user = Supabase.instance.client.auth.currentUser;
+      final user =
+          Supabase.instance.client.auth.currentUser;
 
       if (user == null) {
         throw Exception("User not logged in");
       }
 
-      // ✔ SAFE APPLICATION MODEL
       final app = ApplicationModel(
         userId: user.id,
 
-        yearOfStudy: int.parse(yearController.text.trim()),
+        yearOfStudy: int.parse(
+          yearController.text.trim(),
+        ),
 
         module1: module1Controller.text.trim(),
 
-        module1Level: module1LevelController.text.trim(),
+        module1Level:
+            module1LevelController.text.trim(),
 
-        module2: module2Controller.text.trim().isEmpty
+        module2: module2Controller
+                .text
+                .trim()
+                .isEmpty
             ? null
             : module2Controller.text.trim(),
 
-        module2Level: module2LevelController.text.trim().isEmpty
+        module2Level: module2LevelController
+                .text
+                .trim()
+                .isEmpty
             ? null
             : module2LevelController.text.trim(),
 
@@ -105,7 +106,9 @@ class _ApplicationFormScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Application submitted successfully"),
+          content: Text(
+            "Application submitted successfully",
+          ),
         ),
       );
 
@@ -115,7 +118,9 @@ class _ApplicationFormScreenState
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Application failed: $e"),
+          content: Text(
+            "Application failed: $e",
+          ),
         ),
       );
     } finally {
@@ -137,17 +142,22 @@ class _ApplicationFormScreenState
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
         controller: controller,
-        keyboardType:
-            isNumber ? TextInputType.number : TextInputType.text,
+
+        keyboardType: isNumber
+            ? TextInputType.number
+            : TextInputType.text,
+
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
+
         validator: (value) {
           if (requiredField &&
-              (value == null || value.trim().isEmpty)) {
+              (value == null ||
+                  value.trim().isEmpty)) {
             return "Please enter $label";
           }
           return null;
@@ -165,13 +175,15 @@ class _ApplicationFormScreenState
         title: const Text("Application Form"),
         centerTitle: true,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
+
         child: Form(
           key: _formKey,
+
           child: ListView(
             children: [
-
               buildTextField(
                 controller: yearController,
                 label: "Year of Study",
@@ -196,16 +208,23 @@ class _ApplicationFormScreenState
 
               buildTextField(
                 controller: module2LevelController,
-                label: "Module 2 Level (Optional)",
+                label:
+                    "Module 2 Level (Optional)",
                 requiredField: false,
               ),
 
               Card(
                 child: SwitchListTile(
-                  title: const Text("I meet the requirements"),
+                  title: const Text(
+                    "I meet the requirements",
+                  ),
+
                   value: isEligible,
+
                   onChanged: (value) {
-                    setState(() => isEligible = value);
+                    setState(() {
+                      isEligible = value;
+                    });
                   },
                 ),
               ),
@@ -213,17 +232,21 @@ class _ApplicationFormScreenState
               const SizedBox(height: 25),
 
               isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator(),
+                    )
                   : SizedBox(
                       height: 50,
+
                       child: ElevatedButton(
                         onPressed: submitApplication,
-                        child: const Text("Submit Application"),
+
+                        child: const Text(
+                          "Submit Application",
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -231,3 +254,4 @@ class _ApplicationFormScreenState
     );
   }
 }
+

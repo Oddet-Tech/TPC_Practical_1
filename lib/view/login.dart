@@ -1,8 +1,9 @@
+import 'package:final_tpg_project_p1/view/admin_dashboard.dart';
+import 'package:final_tpg_project_p1/view/forgot_password_view.dart';
 import 'package:final_tpg_project_p1/view/student_home.dart';
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
 import 'signup.dart';
-import 'forgot_password_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,32 +14,64 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
+
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
   bool isLoading = false;
 
   void login() async {
     if (isLoading) return;
     setState(() => isLoading = true);
 
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
     try {
-      await _authService.signIn(emailController.text, passwordController.text);
+      // 🔐 ADMIN LOGIN
+      if (email == "tpg@gmail.com" && password == "12345") {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Admin login successful')),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AdminDashboard(),
+          ),
+        );
+
+        return;
+      }
+
+      // 👤 STUDENT LOGIN (SUPABASE)
+      await _authService.signIn(email, password);
+
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Login successful')));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login successful')),
+      );
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const StudentHome()),
+        MaterialPageRoute(
+          builder: (context) => const StudentHome(),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Login failed: $e')));
-    }
 
-    if (mounted) setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: $e')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
   }
 
   @override
@@ -61,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: 20),
 
-                  // Title
                   const Text(
                     'Welcome Back',
                     textAlign: TextAlign.center,
@@ -69,42 +101,43 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 1.2,
                     ),
                   ),
+
                   const SizedBox(height: 8),
+
                   const Text(
                     'Sign in to continue',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15, color: Colors.white70),
                   ),
+
                   const SizedBox(height: 40),
 
-                  // Email field
                   _buildTextField(
                     controller: emailController,
                     label: 'Email',
                     icon: Icons.email_outlined,
                   ),
+
                   const SizedBox(height: 16),
 
-                  // Password field
                   _buildTextField(
                     controller: passwordController,
                     label: 'Password',
                     icon: Icons.lock_outline,
                     obscureText: true,
                   ),
+
                   const SizedBox(height: 4),
 
-                  // Forgot password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ForgotPasswordPage(),
+                          builder: (context) => ForgotPasswordView(),
                         ),
                       ),
                       child: const Text(
@@ -113,12 +146,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 24),
 
-                  // Login button or loader
                   isLoading
                       ? const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -134,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
-                                elevation: 0,
                               ),
                               child: const Text(
                                 'Login',
@@ -144,7 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
+
                             const SizedBox(height: 12),
+
                             TextButton(
                               onPressed: () => Navigator.push(
                                 context,
