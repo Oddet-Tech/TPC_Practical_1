@@ -24,8 +24,7 @@ class ApplicationViewModel extends ChangeNotifier {
   String? errorMessage;
   UserModel? currentUser;
 
-  String get userRole => currentUser?.role ?? '';
-  bool get isAdmin => userRole == 'admin';
+  bool get isAdmin => currentUser?.isAdmin ?? false;
   bool get isAuthenticated => currentUser != null;
 
   // ========================= LOGIN =========================
@@ -98,7 +97,7 @@ class ApplicationViewModel extends ChangeNotifier {
       final response = await Supabase
           .instance
           .client
-          .from('users')
+          .from('profiles')
           .select()
           .eq('id', authUser.id)
           .single();
@@ -214,12 +213,7 @@ class ApplicationViewModel extends ChangeNotifier {
     try {
 
       await _service.deleteApplication(id);
-
-      applications.removeWhere(
-        (a) => a.id == id,
-      );
-
-      notifyListeners();
+      await fetchAllApplications();
 
     } catch (e) {
 
@@ -265,15 +259,7 @@ class ApplicationViewModel extends ChangeNotifier {
 
     try {
 
-      // UPDATE STATUS IN SUPABASE
-      await Supabase.instance.client
-          .from('applications')
-          .update({
-            'status': status,
-          })
-          .eq('id', id);
-
-      // REFRESH APPLICATIONS
+      await _service.updateStatus(id, status);
       await fetchAllApplications();
 
     } catch (e) {
