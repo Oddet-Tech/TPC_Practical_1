@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+//Incase Studentt forgets their password,
+// they can reset it by entering their email address,
+// and a password reset link will be sent to their email.
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
 
@@ -10,7 +12,7 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final TextEditingController emailController = TextEditingController();
-
+//By entering the Email, a Change password Link will be sent to the email address provided by the student.
   Future<void> _resetPassword() async {
     final supabase = Supabase.instance.client;
     final messenger = ScaffoldMessenger.of(context);

@@ -4,7 +4,10 @@ import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+//All the details a student needs to fill in the application form,
+// such as their year of study, selected modules, 
+//and a declaration of meeting the requirements.
+//And also the CRUD Methods for the application form, such as creating a new application,
 class ApplicationFormScreen extends StatefulWidget {
   const ApplicationFormScreen({super.key});
 
@@ -12,7 +15,8 @@ class ApplicationFormScreen extends StatefulWidget {
   State<ApplicationFormScreen> createState() =>
       _ApplicationFormScreenState();
 }
-
+//These are simple text fields for the student to input their information,
+// along with a switch to confirm that they meet the requirements for the application.
 class _ApplicationFormScreenState
     extends State<ApplicationFormScreen> {
   final _formKey = GlobalKey<FormState>();

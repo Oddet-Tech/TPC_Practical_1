@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
-// This is the signup screen where new users can create an account by providing their email and password.
+// This is the signup screen where new users can create an 
+//account by providing their email and password.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
 }
-
+//User Account will need verification through email, 
+//and the user will receive a verification email after signing up.
 class _SignupScreenState extends State<SignupScreen> {
   final AuthService _authService = AuthService();
   final TextEditingController emailController = TextEditingController();
