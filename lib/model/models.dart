@@ -1,5 +1,5 @@
 class ApplicationModel {
-  final String? id; // ✅ FIXED: allow Supabase to generate UUID
+  final String? id; // allow Supabase to generate UUID
   final String userId;
   final int yearOfStudy;
   final String module1;
@@ -7,7 +7,7 @@ class ApplicationModel {
   final String? module2;
   final String? module2Level;
   final bool isEligible;
-  final String? documentUrl; // ✅ FIXED: optional instead of requi
+  final String? documentUrl; // optional instead of requiered
   final String status;
   final DateTime createdAt;
 
@@ -25,7 +25,9 @@ class ApplicationModel {
     required this.createdAt,
   });
 
-  // 🔄 FROM SUPABASE → APP
+  //  from supabase to APP(The saved information in the 
+  //database is in JSON format, so we need to
+  // convert it to a Dart object that we can use in our app.)
   factory ApplicationModel.fromJson(Map<String, dynamic> json) {
     return ApplicationModel(
       id: json['id']?.toString(),
@@ -42,10 +44,10 @@ class ApplicationModel {
     );
   }
 
-  // 🔄 APP → SUPABASE
+  // this take the Added information by user to 
+  //convert it to JSON format to save it in the database
   Map<String, dynamic> toJson() {
     return {
-      // ❌ DO NOT send id (Supabase generates it)
       'id': userId,
       'year_of_study': yearOfStudy,
       'module_level': module1,
@@ -70,7 +72,7 @@ class ApplicationModel {
     required this.fullName,
   });
 
-  // 🔄 Convert from Supabase JSON → Dart object
+  //  Convert from Supabase JSON to Dart object
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],
@@ -80,7 +82,7 @@ class ApplicationModel {
     );
   }
 
-  // 🔄 Convert Dart object → JSON (for DB if needed)
+  //  Convert Dart object to JSON (for DB if needed)
   Map<String, dynamic> toJson() {
     return {
       'id': id,

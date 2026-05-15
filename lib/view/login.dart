@@ -4,7 +4,7 @@ import 'package:final_tpg_project_p1/view/student_home.dart';
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
 import 'signup.dart';
-
+// This is the login screen where users can enter their email and password to access their account.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -28,7 +28,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
 
     try {
-      // 🔐 ADMIN LOGIN
+      //  admin Login(this is also manually handled in the supabase too), it is not a good practice 
+      //to write it on a plane file like this , but for the sake of simplicity and time, I will leave it like this.
       if (email == "tpg@gmail.com" && password == "12345") {
         if (!mounted) return;
 
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // 👤 STUDENT LOGIN (SUPABASE)
+      //student Login , it is handled by the auth service which is connected to the supabase authentication system.
       await _authService.signIn(email, password);
 
       if (!mounted) return;

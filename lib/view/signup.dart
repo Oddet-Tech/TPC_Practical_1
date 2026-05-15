@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:final_tpg_project_p1/service/auth_service.dart';
-
+// This is the signup screen where new users can create an account by providing their email and password.
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 

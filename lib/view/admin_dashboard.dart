@@ -1,7 +1,7 @@
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+//admin will access all Applications and will have the ability to approve, reject, or delete them.
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+//incase The user forgets their password, they can reset it by entering their email.
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});

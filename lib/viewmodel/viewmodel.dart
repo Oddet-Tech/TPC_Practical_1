@@ -5,7 +5,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../model/models.dart';
 import '../services/application_service.dart';
 
+// Here we will manage all the logic related to the application,
+// such as fetching, creating, updating, and deleting applications (CRUD).
+// It will also handle user authentication and role management.
+// This way, our UI can simply call these methods without worrying
+// about the underlying implementation.
+
 class ApplicationViewModel extends ChangeNotifier {
+
   final ApplicationService _service = ApplicationService();
   final AuthService _authService = AuthService();
 
@@ -22,173 +29,284 @@ class ApplicationViewModel extends ChangeNotifier {
   bool get isAuthenticated => currentUser != null;
 
   // ========================= LOGIN =========================
-  Future<bool> login(String email, String password) async {
+
+  Future<bool> login(
+    String email,
+    String password,
+  ) async {
+
     isLoading = true;
     errorMessage = null;
+
     notifyListeners();
 
     try {
-      await _authService.signIn(email, password);
+
+      await _authService.signIn(
+        email,
+        password,
+      );
+
       await _loadCurrentUser();
+
       return true;
+
     } catch (e) {
-      errorMessage = 'Login failed. Check your credentials.';
+
+      errorMessage =
+          'Login failed. Check your credentials.';
+
       return false;
+
     } finally {
+
       isLoading = false;
       notifyListeners();
     }
   }
 
   // ========================= LOGOUT =========================
+
   Future<void> logout() async {
+
     try {
+
       await _authService.signOut();
+
       currentUser = null;
       applications = [];
+
     } catch (e) {
+
       errorMessage = 'Logout failed: $e';
     }
+
     notifyListeners();
   }
 
-  // ========================= LOAD USER =========================
+  // ========================= LOAD CURRENT USER =========================
+
   Future<void> _loadCurrentUser() async {
+
     try {
-      final authUser = _authService.getCurrentUser();
+
+      final authUser =
+          _authService.getCurrentUser();
+
       if (authUser == null) return;
 
-      final response = await Supabase.instance.client
+      final response = await Supabase
+          .instance
+          .client
           .from('users')
           .select()
           .eq('id', authUser.id)
           .single();
 
-      currentUser = UserModel.fromJson(response);
+      currentUser =
+          UserModel.fromJson(response);
+
     } catch (e) {
-      errorMessage = 'Failed to load current user: $e';
+
+      errorMessage =
+          'Failed to load current user: $e';
     }
 
     notifyListeners();
   }
 
   // ========================= FETCH USER APPLICATIONS =========================
-  Future<void> fetchUserApplications(String userId) async {
+
+  Future<void> fetchUserApplications(
+    String userId,
+  ) async {
+
     isLoading = true;
     errorMessage = null;
+
     notifyListeners();
 
     try {
-      applications = await _service.getUserApplications(userId);
+
+      applications =
+          await _service.getUserApplications(
+        userId,
+      );
+
     } catch (e) {
+
       applications = [];
-      errorMessage = 'Failed to load applications: $e';
+
+      errorMessage =
+          'Failed to load applications: $e';
+
     } finally {
+
       isLoading = false;
       notifyListeners();
     }
   }
 
-  // ========================= CREATE =========================
-  Future<void> createApplication(ApplicationModel app) async {
+  // ========================= CREATE APPLICATION =========================
+
+  Future<void> createApplication(
+    ApplicationModel app,
+  ) async {
+
     isSubmitting = true;
     errorMessage = null;
+
     notifyListeners();
 
     try {
+
       await _service.createApplication(app);
 
-      // 🔥 FIX: refresh list after insert
-      await fetchUserApplications(app.userId);
+      // REFRESH APPLICATIONS
+      await fetchUserApplications(
+        app.userId,
+      );
+
     } catch (e) {
-      errorMessage = 'Failed to submit application: $e';
+
+      errorMessage =
+          'Failed to submit application: $e';
+
       rethrow;
+
     } finally {
+
       isSubmitting = false;
       notifyListeners();
     }
   }
 
-  // ========================= UPDATE =========================
-  Future<void> updateApplication(ApplicationModel app) async {
+  // ========================= UPDATE APPLICATION =========================
+
+  Future<void> updateApplication(
+    ApplicationModel app,
+  ) async {
+
     try {
+
       await _service.updateApplication(app);
 
-      // 🔥 FIX: refresh instead of silent update
-      await fetchUserApplications(app.userId);
+      // REFRESH APPLICATIONS
+      await fetchUserApplications(
+        app.userId,
+      );
+
     } catch (e) {
-      errorMessage = 'Failed to update application: $e';
+
+      errorMessage =
+          'Failed to update application: $e';
+
       notifyListeners();
     }
   }
 
-  // ========================= DELETE =========================
-  Future<void> deleteApplication(String id) async {
+  // ========================= DELETE APPLICATION =========================
+
+  Future<void> deleteApplication(
+    String id,
+  ) async {
+
     try {
+
       await _service.deleteApplication(id);
 
-      applications.removeWhere((a) => a.id == id);
+      applications.removeWhere(
+        (a) => a.id == id,
+      );
+
       notifyListeners();
+
     } catch (e) {
-      errorMessage = 'Failed to delete application: $e';
+
+      errorMessage =
+          'Failed to delete application: $e';
+
       notifyListeners();
     }
   }
 
-  // ========================= FETCH ALL =========================
+  // ========================= FETCH ALL APPLICATIONS =========================
+
   Future<void> fetchAllApplications() async {
+
     isLoading = true;
     errorMessage = null;
+
     notifyListeners();
 
     try {
-      applications = await _service.getAllApplications();
+
+      applications =
+          await _service.getAllApplications();
+
     } catch (e) {
-      errorMessage = 'Failed to load applications: $e';
+
+      errorMessage =
+          'Failed to load applications: $e';
+
     } finally {
+
       isLoading = false;
       notifyListeners();
     }
   }
 
   // ========================= UPDATE STATUS =========================
-  Future<void> updateStatus(String id, String status) async {
+
+  Future<void> updateStatus(
+    String id,
+    String status,
+  ) async {
+
     try {
-      await _service.updateStatus(id, status);
 
-      final index = applications.indexWhere((a) => a.id == id);
+      // UPDATE STATUS IN SUPABASE
+      await Supabase.instance.client
+          .from('applications')
+          .update({
+            'status': status,
+          })
+          .eq('id', id);
 
-      if (index != -1) {
-        applications[index] = ApplicationModel(
-          id: applications[index].id,
-          userId: applications[index].userId,
-          yearOfStudy: applications[index].yearOfStudy,
-          module1: applications[index].module1,
-          module1Level: applications[index].module1Level,
-          module2: applications[index].module2,
-          module2Level: applications[index].module2Level,
-          isEligible: applications[index].isEligible,
-          documentUrl: applications[index].documentUrl,
-          status: status,
-          createdAt: applications[index].createdAt,
-        );
-      }
+      // REFRESH APPLICATIONS
+      await fetchAllApplications();
 
-      notifyListeners();
     } catch (e) {
-      errorMessage = 'Failed to update status: $e';
+
+      errorMessage =
+          'Failed to update status: $e';
+
       notifyListeners();
     }
   }
 
-  // ========================= CHECK EXISTING =========================
-  Future<bool> hasExistingApplication(String userId) async {
+  // ========================= CHECK EXISTING APPLICATION =========================
+
+  Future<bool> hasExistingApplication(
+    String userId,
+  ) async {
+
     try {
-      final userApps = await _service.getUserApplications(userId);
+
+      final userApps =
+          await _service.getUserApplications(
+        userId,
+      );
+
       return userApps.isNotEmpty;
+
     } catch (e) {
-      errorMessage = 'Failed to check application: $e';
+
+      errorMessage =
+          'Failed to check application: $e';
+
       notifyListeners();
+
       return false;
     }
   }
