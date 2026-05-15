@@ -134,8 +134,9 @@ class _AdminDashboardState
                               ),
 
                               onPressed: () async {
-                                if (app.id == null)
+                                if (app.id == null) {
                                   return;
+                                }
 
                                 await vm
                                     .deleteApplication(
