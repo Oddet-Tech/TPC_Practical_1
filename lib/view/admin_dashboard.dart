@@ -1,7 +1,10 @@
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-//admin will access all Applications and will have the ability to approve, reject, or delete them.
+
+
+//admin will access all Applications and
+// will have the ability to approve, reject, or delete them.
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -35,7 +38,8 @@ class _AdminDashboardState
       appBar: AppBar(
         title: const Text("Admin Dashboard"),
       ),
-
+//All applications are displayed in a list, 
+//with options to approve, reject, or delete each application.
       body: vm.isLoading
           ? const Center(
               child: CircularProgressIndicator(),
@@ -53,40 +57,36 @@ class _AdminDashboardState
                     child: Column(
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
-
+//infomation about the application, such as the student ID, year of study, selected modules,
+// and current status is displayed.This infomation is retrieved from the
+// Application form and the generated ID for the student.
                       children: [
                         Text(
-                          "Student ID: ${app.userId}",
+                          "Student ID: ${app.userId}",//A Generated ID is used to
+                          // identify the student who submitted the application.
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         Text(
-                          "Year: ${app.yearOfStudy}",
+                          "Year: ${app.yearOfStudy}",//from the Application form
                         ),
-
                         Text(
                           "Module 1: ${app.module1} (${app.module1Level})",
                         ),
-
                         if (app.module2 != null)
                           Text(
                             "Module 2: ${app.module2} (${app.module2Level})",
                           ),
-
                         const SizedBox(height: 5),
 
                         Text(
                           "Status: ${app.status}",
                         ),
-
                         const SizedBox(height: 10),
-
                         Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
-
                           children: [
                             ElevatedButton(
                               onPressed: () async {
@@ -96,33 +96,26 @@ class _AdminDashboardState
                                   app.id!,
                                   "approved",
                                 );
-
                                 await vm.fetchAllApplications();
                               },
-
                               child: const Text(
                                 "Approve",
                               ),
                             ),
-
                             ElevatedButton(
                               onPressed: () async {
                                 if (app.id == null) return;
-
                                 await vm.updateStatus(
                                   app.id!,
                                   "rejected",
                                 );
-
                                 await vm.fetchAllApplications();
                               },
-
                               style:
                                   ElevatedButton.styleFrom(
                                 backgroundColor:
                                     Colors.red,
                               ),
-
                               child: const Text(
                                 "Reject",
                               ),
