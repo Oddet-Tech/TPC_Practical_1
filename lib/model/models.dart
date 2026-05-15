@@ -33,19 +33,17 @@ class ApplicationModel {
       id: json['id']?.toString(),
       userId: json['id']?.toString() ?? '',
       yearOfStudy: json['year_of_study'],
-      module1: json['module_level'],
-      module1Level: json['module1_level'],
-      module2: json['module2'],
+      module1: json['module_level'] ?? '',
+      module1Level: json['module1_level'] ?? '',
+      module2: null,
       module2Level: json['module2_level'],
-      isEligible: json['is_eligible'],
+      isEligible: json['is_eligible'] ?? false,
       documentUrl: json['document_url'],
-      status: json['status'],
+      status: json['status'] ?? 'pending',
       createdAt: DateTime.parse(json['created_at']),
     );
   }
 
-  // this take the Added information by user to 
-  //convert it to JSON format to save it in the database
   Map<String, dynamic> toJson() {
     return {
       'id': userId,
@@ -62,33 +60,27 @@ class ApplicationModel {
 }class UserModel {
   final String id;
   final String email;
-  final String role;
-  final String fullName;
+  final bool isAdmin;
 
   UserModel({
     required this.id,
     required this.email,
-    required this.role,
-    required this.fullName,
+    required this.isAdmin,
   });
 
-  //  Convert from Supabase JSON to Dart object
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'],
       email: json['email'],
-      role: json['role'],
-      fullName: json['full_name'],
+      isAdmin: json['is_admin'] ?? false,
     );
   }
 
-  //  Convert Dart object to JSON (for DB if needed)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'email': email,
-      'role': role,
-      'full_name': fullName,
+      'is_admin': isAdmin,
     };
   }
 }
