@@ -1,4 +1,10 @@
-
+//Group P1 members: Shilenge Oddet 223015126
+//Brandon Lombaard 223021599
+//Motloli TJ 22206982
+//Quadri PF 224017653
+//Asive Mnyamazi 224113476
+//Selahla KO 221007346
+// Makhanye NJ 220000689
 import 'package:final_tpg_project_p1/model/models.dart';
 import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';

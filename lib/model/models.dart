@@ -76,6 +76,8 @@ class ApplicationModel {
     );
   }
 
+  String? get role => null;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

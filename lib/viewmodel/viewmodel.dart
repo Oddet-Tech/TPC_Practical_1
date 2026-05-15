@@ -1,7 +1,13 @@
+//Group P1 members: Shilenge Oddet 223015126
+//Brandon Lombaard 223021599
+//Motloli TJ 22206982
+//Quadri PF 224017653
+//Asive Mnyamazi 224113476
+//Selahla KO 221007346
+// Makhanye NJ 220000689
 import 'package:final_tpg_project_p1/service/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../model/models.dart';
 import '../services/application_service.dart';
 
@@ -24,7 +30,8 @@ class ApplicationViewModel extends ChangeNotifier {
   String? errorMessage;
   UserModel? currentUser;
 
-  bool get isAdmin => currentUser?.isAdmin ?? false;
+  String get userRole => currentUser?.role ?? '';
+  bool get isAdmin => userRole == 'admin';
   bool get isAuthenticated => currentUser != null;
 
   // ========================= LOGIN =========================
@@ -97,7 +104,7 @@ class ApplicationViewModel extends ChangeNotifier {
       final response = await Supabase
           .instance
           .client
-          .from('profiles')
+          .from('users')
           .select()
           .eq('id', authUser.id)
           .single();
@@ -213,7 +220,12 @@ class ApplicationViewModel extends ChangeNotifier {
     try {
 
       await _service.deleteApplication(id);
-      await fetchAllApplications();
+
+      applications.removeWhere(
+        (a) => a.id == id,
+      );
+
+      notifyListeners();
 
     } catch (e) {
 
@@ -259,7 +271,15 @@ class ApplicationViewModel extends ChangeNotifier {
 
     try {
 
-      await _service.updateStatus(id, status);
+      // UPDATE STATUS IN SUPABASE
+      await Supabase.instance.client
+          .from('applications')
+          .update({
+            'status': status,
+          })
+          .eq('id', id);
+
+      // REFRESH APPLICATIONS
       await fetchAllApplications();
 
     } catch (e) {

@@ -1,3 +1,10 @@
+//Group P1 members: Shilenge Oddet 223015126
+//Brandon Lombaard 223021599
+//Motloli TJ 22206982
+//Quadri PF 224017653
+//Asive Mnyamazi 224113476
+//Selahla KO 221007346
+// Makhanye NJ 220000689
 import 'package:final_tpg_project_p1/view/admin_dashboard.dart';
 import 'package:final_tpg_project_p1/view/forgot_password_view.dart';
 import 'package:final_tpg_project_p1/view/student_home.dart';
@@ -216,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextField(
       controller: controller,
       obscureText: obscureText,
-      style: const TextStyle(color: Colors.black),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.white70),
