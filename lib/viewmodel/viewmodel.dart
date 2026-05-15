@@ -106,9 +106,8 @@ class ApplicationViewModel extends ChangeNotifier {
           UserModel.fromJson(response);
 
     } catch (e) {
-
-      errorMessage =
-          'Failed to load current user: $e';
+      // No profile row means regular student — not an error
+      currentUser = null;
     }
 
     notifyListeners();

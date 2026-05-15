@@ -1,8 +1,9 @@
 import 'package:final_tpg_project_p1/view/admin_dashboard.dart';
 import 'package:final_tpg_project_p1/view/forgot_password_view.dart';
 import 'package:final_tpg_project_p1/view/student_home.dart';
+import 'package:final_tpg_project_p1/viewmodel/viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:final_tpg_project_p1/service/auth_service.dart';
+import 'package:provider/provider.dart';
 import 'signup.dart';
 // This is the login screen where users can enter their email and password to access their account.
 class LoginScreen extends StatefulWidget {
@@ -13,66 +14,33 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthService _authService = AuthService();
-
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  bool isLoading = false;
-
   void login() async {
-    if (isLoading) return;
-    setState(() => isLoading = true);
-
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+    if (email.isEmpty || password.isEmpty) return;
 
-    try {
-      //  admin Login(this is also manually handled in the supabase too), it is not a good practice 
-      //to write it on a plane file like this , but for the sake of simplicity and time, I will leave it like this.
-      if (email == "tpg@gmail.com" && password == "12345") {
-        if (!mounted) return;
+    final vm = Provider.of<ApplicationViewModel>(context, listen: false);
+    final success = await vm.login(email, password);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Admin login successful')),
-        );
+    if (!mounted) return;
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AdminDashboard(),
-          ),
-        );
-
-        return;
-      }
-
-      //student Login , it is handled by the auth service which is connected to the supabase authentication system.
-      await _authService.signIn(email, password);
-
-      if (!mounted) return;
-
+    if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login successful')),
+        SnackBar(content: Text(vm.errorMessage ?? 'Login failed')),
       );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const StudentHome(),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: $e')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      return;
     }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            vm.isAdmin ? const AdminDashboard() : const StudentHome(),
+      ),
+    );
   }
 
   @override
@@ -150,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
-                  isLoading
+                  Provider.of<ApplicationViewModel>(context).isLoading
                       ? const Center(
                           child: CircularProgressIndicator(
                             color: Colors.white,
